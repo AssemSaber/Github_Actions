@@ -1,0 +1,55 @@
+name: CD - Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Get the code from GitHub
+      - name: Checkout production code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # 2. Send updated code to the cluster
+      - name: Copy application to cluster
+        run: |
+          rsync -avz --delete \
+            ./ \
+            ${{ secrets.CLUSTER_USER }}@${{ secrets.CLUSTER_HOST }}:/opt/my-app/
+
+      # 3. Run Spark application on the cluster
+      - name: Run Spark job
+        run: |
+          ssh ${{ secrets.CLUSTER_USER }}@${{ secrets.CLUSTER_HOST }} << 'EOF'
+
+          cd /opt/my-app
+
+          spark-submit \
+            --master yarn \
+            --deploy-mode cluster \
+            jobs/cleaning_job.py
+
+          EOF
+
+
+# rsync -avz --delete ./ user@cluster:/opt/my-app/
+
+# copies the new files:
+
+# GitHub Actions                     Cluster
+
+# jobs/                               /opt/my-app/jobs/
+#   cleaning_job.py  ──────────────→    cleaning_job.py
+#                                       ↓ updated
+
+# src/                                /opt/my-app/src/
+#   cleaning.py      ──────────────→    cleaning.py
+#                                       ↓ updated
+
+# Then:
+
+# spark-submit ...
