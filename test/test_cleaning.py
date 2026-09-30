@@ -1,6 +1,8 @@
 
 import pytest
 from pyspark.sql import SparkSession
+import sys
+sys.path.append(".")
 from src.spark import clean_data
 @pytest.fixture(scope="session")
 def spark():
