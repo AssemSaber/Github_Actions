@@ -1,10 +1,7 @@
 
 import pytest
 from pyspark.sql import SparkSession
-
 from pyspark_job import clean_data
-
-
 @pytest.fixture(scope="session")
 def spark():
     spark = (
