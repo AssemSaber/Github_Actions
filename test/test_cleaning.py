@@ -1,10 +1,9 @@
 
 import pytest
 from pyspark.sql import SparkSession
-
-from pyspark_job import clean_data
-
-
+import sys
+sys.path.append(".")
+from src.spark import clean_data
 @pytest.fixture(scope="session")
 def spark():
     spark = (
@@ -26,12 +25,10 @@ def test_clean_data(spark):
         ("charlie", 0.0),
         (None, 100.0),
     ]
-
     df = spark.createDataFrame(
         data,
         ["name", "amount"]
     )
-
     result = clean_data(df).collect()
 
     assert len(result) == 1
